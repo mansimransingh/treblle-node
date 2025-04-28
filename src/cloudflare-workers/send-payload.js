@@ -21,7 +21,7 @@ async function sendPayload(
     error,
   });
 
-  sendPayloadToTreblleApi({ apiKey, trebllePayload, showErrors });
+  await sendPayloadToTreblleApi({ apiKey, trebllePayload, showErrors });
 }
 
 module.exports = {

@@ -281,7 +281,7 @@ function sendKoaPayloadToTreblle(
   sendPayloadToTreblleApi({ apiKey, trebllePayload, showErrors });
 }
 
-function sendPayloadToTreblleApi({ apiKey, trebllePayload, showErrors }) {
+async function sendPayloadToTreblleApi({ apiKey, trebllePayload, showErrors }) {
   let f;
   if (typeof fetch === "function") {
     f = fetch;
@@ -294,7 +294,7 @@ function sendPayloadToTreblleApi({ apiKey, trebllePayload, showErrors }) {
     return;
   }
 
-  f("https://rocknrolla.treblle.com", {
+  return f("https://rocknrolla.treblle.com", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
