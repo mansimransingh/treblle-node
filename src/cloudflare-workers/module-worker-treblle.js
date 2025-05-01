@@ -1,6 +1,35 @@
 const { sendPayload } = require("./send-payload");
 const { generateFieldsToMaskMap } = require("../maskFields");
 
+async function sendToTreblle({
+  requestClone,
+  response,
+  apiKey,
+  projectId,
+  fieldsToMaskMap,
+  showErrors,
+  requestEndTime,
+  requestStartTime,
+  error,
+}) {
+  try {
+    await sendPayload(requestClone, response ? response.clone() : null, {
+      apiKey,
+      projectId,
+      fieldsToMaskMap,
+      showErrors,
+      requestExecutionTime: requestEndTime - requestStartTime,
+      error,
+    });
+  } catch (err) {
+    // Just catch and log Treblle error - we do not want to crash app on Treblle's failure
+    console.error(
+      "Error occurred when sending payload to Treblle, have you set appropriate headers for your content type?",
+      err
+    );
+  }
+}
+
 const moduleWorkerTreblle = function ({
   apiKey,
   projectId,
@@ -25,22 +54,18 @@ const moduleWorkerTreblle = function ({
         error = err;
       }
       const requestEndTime = Date.now();
-      try {
-        await sendPayload(requestClone, response ? response.clone() : null, {
-          apiKey,
-          projectId,
-          fieldsToMaskMap,
-          showErrors,
-          requestExecutionTime: requestEndTime - requestStartTime,
-          error,
-        });
-      } catch (err) {
-        // Just catch and log Treblle error - we do not want to crash app on Treblle's failure
-        console.error(
-          "Error occurred when sending payload to Treblle, have you set appropriate headers for your content type?",
-          err
-        );
-      }
+
+      context.waitUntil(sendToTreblle({
+        requestClone,
+        response,
+        apiKey,
+        projectId,
+        fieldsToMaskMap,
+        showErrors,
+        requestEndTime,
+        requestStartTime,
+        error,
+      }))
 
       if (error) {
         // Rethrow application errors
